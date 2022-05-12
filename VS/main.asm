@@ -48,6 +48,8 @@ ButtonText1     BYTE "1", 0
 ButtonText2     BYTE "Select the second file.", 0
 ButtonText3     BYTE "Compare1", "Compare2", 0
 
+Image_1 BYTE "D:\Files\Resource\Github\MineSweeper\VS\src\images\1.png", 0
+
 menuCaptionText BYTE "Level of Difficulty", 0
 menuEasyText BYTE "Easy", 0
 menuMediumText BYTE "Medium", 0
@@ -66,9 +68,10 @@ File3       HWND 0
 
 
 .const
-Button1ID      equ 1
-Button2ID      equ 2
-Button3ID      equ 3
+Button1ID       equ 1
+Button2ID       equ 2
+Button3ID       equ 3
+BLOCK_SIZE      equ 30
 
 
 .code
@@ -159,12 +162,14 @@ showMap proc C  hWnd:HWND, Width1: DWORD, Height1: DWORD, buttonWidth1: DWORD, b
             sal eax, 16
             or eax, esi
 
+
             push ecx
             push ebx
             invoke CreateWindowEx, NULL, ADDR ButtonClassName, ADDR ButtonText1, \
                     WS_CHILD or WS_VISIBLE or BS_DEFPUSHBUTTON, \
                     edi, esi, buttonWidth1, buttonHeight1, hWnd, eax, hInstance, NULL
-                mov File1, eax
+            mov File1, eax
+
             pop ebx
             pop ecx
 
@@ -175,19 +180,78 @@ showMap proc C  hWnd:HWND, Width1: DWORD, Height1: DWORD, buttonWidth1: DWORD, b
         inc ebx
     .endw
   
-    push edi
-    push esi
-    push edx
-    push ecx
-    push ebx
+    pop edi
+    pop esi
+    pop edx
+    pop ecx
+    pop ebx
     ret
 showMap	endp
 
 
 ;
+; new game
+;
+newGame proc C hWnd: HWND, difficulty: DWORD
+    push ebx
+    push ecx
+    push edx
+    push esi
+    push edi
+
+    
+
+    ; refresh window and reset size of it
+    .if difficulty == 1001
+        mov esi, 9
+        mov edi, 9
+    .elseif difficulty == 1002
+        mov esi, 16
+        mov edi, 16
+    .else
+        mov esi, 30
+        mov edi, 16
+    .endif
+
+    mov eax, BLOCK_SIZE
+    mul esi
+    mov ebx, eax
+    add ebx, 20
+
+    mov eax, BLOCK_SIZE
+    mul edi
+    add eax, 60
+    invoke MoveWindow, hWnd, 100, 150, ebx, eax, 1
+
+    invoke showMap, hWnd, esi, edi, BLOCK_SIZE, BLOCK_SIZE
+
+
+    ; modify the menu
+    mov edi, 1001
+
+    .while edi < 1004
+        mov esi, MF_BYCOMMAND
+        .if difficulty == edi
+            or esi, MF_CHECKED
+        .else
+            or esi, MF_UNCHECKED
+        .endif
+        invoke CheckMenuItem, hSubMenu, edi, esi
+        inc edi
+    .endw
+
+    pop edi
+    pop esi
+    pop edx
+    pop ecx
+    pop ebx
+    ret
+newGame endp
+
+;
 ; message handler
 ;
-handle_function proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
+handle_function proc hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
     .IF uMsg == WM_DESTROY
         invoke DestroyWindow, hWnd
         invoke PostQuitMessage, NULL
@@ -210,14 +274,20 @@ handle_function proc hWnd:HWND, uMsg:UINT, wParam:WPARAM, lParam:LPARAM
 
         invoke SetMenu, hWnd, hMenu
 
-        ; Button 1
-        
-
-        ; Button 2
-        invoke showMap, hWnd, 4, 4, 20, 20
+        invoke newGame, hWnd, 1001
 
     .ELSEIF uMsg == WM_COMMAND
         
+        ; change difficulty
+        .if wParam == 1001  ; easy
+            invoke newGame, hWnd, 1001
+        .elseif wParam == 1002 ; midium
+            invoke newGame, hWnd, 1002
+        .elseif wParam == 1003 ; hard
+            invoke newGame, hWnd, 1003
+        .endif
+
+        ; restart game
 
     .ELSE
         invoke DefWindowProc, hWnd, uMsg, wParam, lParam
