@@ -1,0 +1,8 @@
+C:\Users\xhm2001\Desktop\junior2\assembly\test\Debug\test.exe
+C:\Users\xhm2001\Desktop\junior2\assembly\test\Debug\test.pdb
+C:\Users\xhm2001\Desktop\junior2\assembly\lab2\Debug\lab2.exe
+C:\Users\xhm2001\Desktop\junior2\assembly\lab2\Debug\lab2.pdb
+C:\Users\xhm2001\Desktop\junior2\assembly\lab3\Debug\lab2.exe
+C:\Users\xhm2001\Desktop\junior2\assembly\lab3\Debug\lab2.pdb
+D:\Files\Resource\Github\MineSweeper\VS\Debug\MineSweeper.exe
+D:\Files\Resource\Github\MineSweeper\VS\Debug\MineSweeper.pdb
