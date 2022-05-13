@@ -3,10 +3,6 @@
 option casemap:none
 
 includelib msvcrt.lib
-include Comdlg32.inc
-includelib Comdlg32.lib
-include     \masm32\include\gdi32.inc
-includelib  \masm32\lib\gdi32.lib
 
 atof PROTO C : ptr sbyte
 printf PROTO C : ptr sbyte, :VARARG	
