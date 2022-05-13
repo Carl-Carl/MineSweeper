@@ -1,7 +1,0 @@
-Nonzero indicates that the user 
-specified a file name 
-and clicked the OK button. 
-The buffer pointed to by the lpstrFile 
-member of the OPENFILENAME structure contains the full path and 
-filename specified
- by the user.
