@@ -23,6 +23,9 @@
       <IncludePaths Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\masm32\include;%(IncludePaths)</IncludePaths>
     </MASM>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="msgame.inc" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
