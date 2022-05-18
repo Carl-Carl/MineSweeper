@@ -14,8 +14,7 @@ public Initializing
 Total       DWORD 0
 PLACED_MINE DWORD 0
 POSITION    DWORD 0
-CNT         DWORD 0
-TOTOAL_SCALE DWORD 0
+TOTAL_SCALE DWORD 0
 .code
 
 Initializing   proc
@@ -34,25 +33,26 @@ Initializing   proc
     invoke time,0
     invoke srand,eax
 
-    .while CNT < mine_total
+    xor esi,esi
+    .while esi < mine_total
+        USED:
         invoke rand
         xor    edx,edx
         div    mine_total
         mov    POSITION,edx
 
-        cmp    POSITION,Clicked_point
+        cmp    edx,Clicked_point
         JE     USED
 
         mov    cl, MINE
         mov    ebx, POSITION
-        mov    dword ptr [realBoard+ebx],cl
+        mov    byte ptr [realBoard+ebx],cl
 
-        INC    CNT
-        USED:
+        INC    esi
+
     .endw
 
-    xor ecx,ecx
-    mov CNT,ecx
+    xor esi,esi
 
     xor edx,edx
     mov eax,Board_column
@@ -67,14 +67,14 @@ Initializing   proc
     dec ecx
     mov ROW_MAX, ecx
 
-    .while CNT < TOTAL_SCALE
-        mov ebx,CNT
+    .while esi < TOTAL_SCALE
+        mov ebx,esi
 
         CMP byte ptr [realBoard+ebx], MINE
         JE  IS_MINE
 
         xor edx,edx
-        mov eax,CNT
+        mov eax,esi
         DIV Board_column
    
         .IF eax != 0 
@@ -83,7 +83,7 @@ Initializing   proc
                 sub ebx, Board_column
                 dec ebx
                 .IF byte ptr [realBoard+ebx]==MINE
-                    mov ecx, CNT
+                    mov ecx, esi
                     inc byte ptr [realBoard+ecx]
                 .ENDIF
             .ENDIF
@@ -91,7 +91,7 @@ Initializing   proc
             mov ebx, eax
             sub ebx, Board_column
             .IF byte ptr [realBoard+ebx]==MINE
-                mov ecx, CNT
+                mov ecx, esi
                 inc byte ptr [realBoard+ecx]
             .ENDIF
 
@@ -100,7 +100,7 @@ Initializing   proc
                 sub ebx, Board_column
                 inc ebx
                 .IF byte ptr [realBoard+ebx]==MINE
-                    mov ecx, CNT
+                    mov ecx, esi
                     inc byte ptr [realBoard+ecx]
                 .ENDIF
             .ENDIF
@@ -112,7 +112,7 @@ Initializing   proc
             mov ebx, eax
             dec ebx
             .IF byte ptr [realBoard+ebx]==MINE
-                mov ecx, CNT
+                mov ecx, esi
                 inc byte ptr [realBoard+ecx]
             .ENDIF
         .ENDIF
@@ -121,7 +121,7 @@ Initializing   proc
             mov ebx, eax
             inc ebx
             .IF byte ptr [realBoard+ebx]==MINE
-                mov ecx, CNT
+                mov ecx, esi
                 inc byte ptr [realBoard+ecx]
             .ENDIF
         .ENDIF
@@ -135,7 +135,7 @@ Initializing   proc
                 add ebx, Board_column
                 dec ebx
                 .IF byte ptr [realBoard+ebx]==MINE
-                    mov ecx, CNT
+                    mov ecx, esi
                     inc byte ptr [realBoard+ecx]
                 .ENDIF
             .ENDIF
@@ -143,7 +143,7 @@ Initializing   proc
             mov ebx, eax
             add ebx, Board_column
             .IF byte ptr [realBoard+ebx]==MINE
-                mov ecx, CNT
+                mov ecx, esi
                 inc byte ptr [realBoard+ecx]
             .ENDIF
 
@@ -152,7 +152,7 @@ Initializing   proc
                 add ebx, Board_column
                 inc ebx
                 .IF byte ptr [realBoard+ebx]==MINE
-                    mov ecx, CNT
+                    mov ecx, esi
                     inc byte ptr [realBoard+ecx]
                 .ENDIF
             .ENDIF
@@ -162,7 +162,7 @@ Initializing   proc
 
 
     IS_MINE:
-        INC CNT
+        INC esi
 
     .endw
 
@@ -176,4 +176,4 @@ Initializing   proc
     ret
 Initializing endp
 
-.end
+end
