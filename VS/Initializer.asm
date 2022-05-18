@@ -2,7 +2,7 @@
 .model flat,stdcall
 option casemap:none
 
-include    MineSweeper.inc
+include    msgame.inc
 
 srand  PROTO C :DWORD
 rand   PROTO C 

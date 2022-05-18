@@ -18,6 +18,9 @@
     <MASM Include="main.asm">
       <Filter>源文件</Filter>
     </MASM>
+    <MASM Include="Initializer.asm">
+      <Filter>源文件</Filter>
+    </MASM>
   </ItemGroup>
   <ItemGroup>
     <None Include="msgame.inc">

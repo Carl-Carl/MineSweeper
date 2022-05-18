@@ -31,7 +31,7 @@ NUMBER_5        equ 5
 NUMBER_6        equ 6
 NUMBER_7        equ 7
 NUMBER_8        equ 8
-MINE            equ ffh  ; 仅答案盘
+MINE            equ 0ffh  ; 仅答案盘
 UNKNOWN         equ 10h  ; 仅显示盘
 FLAGED          equ 20h  ; 仅显示盘
 

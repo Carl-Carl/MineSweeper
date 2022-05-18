@@ -18,6 +18,8 @@ fgets PROTO C : ptr sbyte, : dword, : ptr sbyte
 fclose PROTO C : ptr sbyte
 fscanf PROTO C : ptr sbyte, :VARARG	
 
+Initializing  PROTO C
+
 WinMain     proto        ; Main window process
 MessageBoxA proto :DWORD, :DWORD, :DWORD, :DWORD       
 MessageBox 	equ   <MessageBoxA>                        
@@ -248,12 +250,12 @@ showMap proc C  hWnd:HWND, Width1: DWORD, Height1: DWORD, buttonWidth1: DWORD, b
 
             push ecx
             push edx
-            invoke CreateWindowEx, NULL, ADDR ButtonClassName, ADDR ButtonText1, \
-                    WS_CHILD or WS_VISIBLE or BS_PUSHBUTTON or BS_BITMAP, \
+            invoke CreateWindowEx, NULL, ADDR LEDClassName, ADDR ButtonText1, \
+                    WS_CHILD or WS_VISIBLE or SS_BITMAP, \
                     edi, esi, buttonWidth1, buttonHeight1, hWnd, eax, hInstance, NULL
 
             mov esi, eax
-            invoke SendMessage, esi, BM_SETIMAGE, IMAGE_BITMAP, hidden
+            invoke SendMessage, esi, STM_SETIMAGE, IMAGE_BITMAP, hidden
             pop edx
             pop ecx
 
@@ -306,16 +308,22 @@ newGame proc C hWnd: HWND, difficulty: DWORD
     .if difficulty == 1001
         mov esi, 9
         mov edi, 9
+        mov Board_column, 9
+        mov Board_row, 9
         mov led1, 1
         mov led0, 0
     .elseif difficulty == 1002
         mov esi, 16
         mov edi, 16
+        mov Board_column, 16
+        mov Board_row, 16
         mov led1, 4
         mov led0, 0
     .else
         mov esi, 30
         mov edi, 16
+        mov Board_column, 30
+        mov Board_row, 16
         mov led1, 9
         mov led0, 9
     .endif
@@ -369,7 +377,7 @@ loadBitmap proc C
     xor ebx, ebx
     xor esi, esi
     .while esi <= 8
-        invoke  LoadImageA, NULL, addr mine_num_path[ebx], IMAGE_BITMAP, 25, 25, LR_LOADFROMFILE
+        invoke  LoadImageA, NULL, addr mine_num_path[ebx], IMAGE_BITMAP, 30, 30, LR_LOADFROMFILE
         mov dword ptr mine_num[esi*type mine_num], eax
 
         add ebx, mine_num_path_length
@@ -388,25 +396,25 @@ loadBitmap proc C
     .endw
 
     ; load other image of mine status
-    invoke  LoadImageA, NULL, addr hidden_path, IMAGE_BITMAP, 25, 25, LR_LOADFROMFILE
+    invoke  LoadImageA, NULL, addr hidden_path, IMAGE_BITMAP, 30, 30, LR_LOADFROMFILE
     mov hidden, eax
 
-    invoke  LoadImageA, NULL, addr flag_path, IMAGE_BITMAP, 25, 25, LR_LOADFROMFILE
+    invoke  LoadImageA, NULL, addr flag_path, IMAGE_BITMAP, 30, 30, LR_LOADFROMFILE
     mov flag, eax
 
-    invoke  LoadImageA, NULL, addr mine_path, IMAGE_BITMAP, 25, 25, LR_LOADFROMFILE
+    invoke  LoadImageA, NULL, addr mine_path, IMAGE_BITMAP, 30, 30, LR_LOADFROMFILE
     mov mine, eax
 
-    invoke  LoadImageA, NULL, addr exploded_path, IMAGE_BITMAP, 25, 25, LR_LOADFROMFILE
+    invoke  LoadImageA, NULL, addr exploded_path, IMAGE_BITMAP, 30, 30, LR_LOADFROMFILE
     mov exploded, eax
 
-    invoke  LoadImageA, NULL, addr red_path, IMAGE_BITMAP, 25, 25, LR_LOADFROMFILE
+    invoke  LoadImageA, NULL, addr red_path, IMAGE_BITMAP, 30, 30, LR_LOADFROMFILE
     mov red, eax
 
-    invoke  LoadImageA, NULL, addr green_path, IMAGE_BITMAP, 25, 25, LR_LOADFROMFILE
+    invoke  LoadImageA, NULL, addr green_path, IMAGE_BITMAP, 30, 30, LR_LOADFROMFILE
     mov green, eax
 
-    invoke  LoadImageA, NULL, addr flag_wrong_path, IMAGE_BITMAP, 25, 25, LR_LOADFROMFILE
+    invoke  LoadImageA, NULL, addr flag_wrong_path, IMAGE_BITMAP, 30, 30, LR_LOADFROMFILE
     mov flag_wrong, eax
 
     pop edx
@@ -418,12 +426,33 @@ loadBitmap endp
 ;
 ; input handle of button and handle of image, then the image of button will change
 ;
-changeButtonImage proc C button_hwnd: HWND, image: dword
+changeButtonImage proc C button_hwnd: dword, image: dword
     push ecx
     push edx
+    push esi
+    push edi
 
-    invoke SendMessage, button_hwnd, BM_SETIMAGE, IMAGE_BITMAP, image
+    mov eax, button_hwnd
+    mov dl, 30
+    div dl
+    xor ebx, ebx
+    mov bl, al ; x
 
+    mov eax, button_hwnd
+    shr eax, 16
+    sub eax, 60
+    div dl
+    xor ecx, ecx
+    mov cl, al ; y
+
+    mov eax, ecx
+    mul Board_column
+    add eax, ebx
+
+    invoke SendMessage, buttons_all[eax*type buttons_all], STM_SETIMAGE, IMAGE_BITMAP, image
+
+    pop edi
+    pop esi
     pop edx
     pop ecx
     ret
@@ -478,12 +507,25 @@ handle_function proc hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
         shr ebx, 16
         .if bh == BN_CLICKED  
             ; "lParam" is the handle of button
+            
+
+        .endif
+
+    .ELSEIF uMsg == WM_LBUTTONUP 
+        .if gameState == STATE_INIT
+            invoke Initializing
+            mov gameState, STATE_PLAYING
             invoke changeButtonImage, lParam, green
 
-            invoke showLED, hWnd, -1
-        .elseif bh == BN_DOUBLECLICKED
-            invoke changeButtonImage, lParam, flag
+        .elseif gameState == STATE_PLAYING
+
+        .else
+            
         .endif
+        ; invoke showLED, hWnd, -1
+
+    .ELSEIF uMsg == WM_RBUTTONUP 
+        invoke changeButtonImage, lParam, flag
 
     .ELSE
         invoke DefWindowProc, hWnd, uMsg, wParam, lParam
