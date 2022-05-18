@@ -62,3 +62,8 @@ hintBoard       byte MAX_CELLS DUP(0)
 ; 俩数组 能加到坐标上形成8个方向的相邻坐标
 row_directions  dword  0,  1,  1,  1,  0, -1, -1, -1
 col_directions  dword -1, -1,  0,  1,  1,  1,  0, -1
+
+mine_total      dword 0 ;记录雷的总数
+Board_column    dword 0 ;图的总列数
+Board_row       dword 0 ;图的总行数
+Clicked_point   dword 0 ;上一个点击的位置
