@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="Initializer.asm" />
     <MASM Include="main.asm">
       <IncludePaths Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\masm32\include;%(IncludePaths)</IncludePaths>
     </MASM>

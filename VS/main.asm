@@ -306,27 +306,27 @@ newGame proc C hWnd: HWND, difficulty: DWORD
 
     ; refresh window and reset size of it
     .if difficulty == 1001
-        mov esi, 9
-        mov edi, 9
-        mov Board_column, 9
-        mov Board_row, 9
+        mov Board_column, BEGINNER_WIDTH
+        mov Board_row, BEGINNER_HEIGHT
         mov led1, 1
         mov led0, 0
+        mov mine_total, BEGINNER_MINES
     .elseif difficulty == 1002
-        mov esi, 16
-        mov edi, 16
-        mov Board_column, 16
-        mov Board_row, 16
+        mov Board_column, INTERMEDIATE_WIDTH
+        mov Board_row, INTERMEDIATE_HEIGHT
         mov led1, 4
         mov led0, 0
+        mov mine_total, INTERMEDIATE_MINES
     .else
-        mov esi, 30
-        mov edi, 16
-        mov Board_column, 30
-        mov Board_row, 16
+        mov Board_column, EXPERT_WIDTH
+        mov Board_row, EXPERT_HEIGHT
         mov led1, 9
         mov led0, 9
+        mov mine_total, EXPERT_MINES
     .endif
+
+    mov esi, Board_column
+    mov edi, Board_row
 
     invoke showLED, hWnd, 0
 
@@ -426,19 +426,20 @@ loadBitmap endp
 ;
 ; input handle of button and handle of image, then the image of button will change
 ;
-changeButtonImage proc C button_hwnd: dword, image: dword
+changeButtonImage proc C lParam: dword, image: dword
+    push ebx
     push ecx
     push edx
     push esi
     push edi
 
-    mov eax, button_hwnd
+    mov eax, lParam
     mov dl, 30
     div dl
     xor ebx, ebx
     mov bl, al ; x
 
-    mov eax, button_hwnd
+    mov eax, lParam
     shr eax, 16
     sub eax, 60
     div dl
@@ -455,9 +456,106 @@ changeButtonImage proc C button_hwnd: dword, image: dword
     pop esi
     pop edx
     pop ecx
+    pop ebx
     ret
 changeButtonImage endp
 
+
+;
+; calculate click position
+;
+resolveClickPosition proc C lParam: dword
+    push ebx
+    push ecx
+    push edx
+    push esi
+    push edi
+
+    mov eax, lParam
+    mov dl, 30
+    div dl
+    xor ebx, ebx
+    mov bl, al ; x
+
+    mov eax, lParam
+    shr eax, 16
+    sub eax, 60
+    div dl
+    xor ecx, ecx
+    mov cl, al ; y
+
+    mov Clicked_column, ebx
+    mov Clicked_row, ecx
+
+    pop edi
+    pop esi
+    pop edx
+    pop ecx
+    pop ebx
+    ret
+resolveClickPosition endp
+
+
+;
+;
+;
+updateShow proc C 
+    local cnt: dword, image: HWND
+
+    push ebx
+    push ecx
+    push edx
+    push esi
+    push edi
+
+
+    mov eax, Board_column
+    mov ebx, Board_row
+    mul ebx
+    mov cnt, eax
+    
+    xor ebx, ebx ; count the button
+
+    .while ebx < cnt
+        mov esi, dword ptr playBoard[ebx*type buttons_all]
+        mov edi, dword ptr hintBoard[ebx*type buttons_all]
+
+        .if edi != HINT_NONE
+            .if edi == HINT_SAFE
+                push green
+            .elseif edi == HINT_MINE   
+                push red
+            .endif
+        .else
+            .if esi >= NUMBER_0 && esi <= NUMBER_8
+                push mine_num[esi*type mine_num]
+            .elseif esi == MINE   
+                push mine
+            .elseif esi == UNKNOWN
+                push hidden
+            .elseif esi == FLAGED 
+                push flag
+            .elseif esi == EXPLODED
+                push exploded
+            .elseif esi == FLAG_WRONG 
+                push flag_wrong
+            .endif
+
+        .endif
+        
+        pop image
+        invoke SendMessage, buttons_all[ebx*type buttons_all], STM_SETIMAGE, IMAGE_BITMAP, image
+
+        inc ebx
+    .endw
+
+    pop edi
+    pop esi
+    pop edx
+    pop ecx
+    pop ebx
+    ret
+updateShow endp
 
 ;
 ; message handler
@@ -513,18 +611,24 @@ handle_function proc hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 
     .ELSEIF uMsg == WM_LBUTTONUP 
         .if gameState == STATE_INIT
-            invoke Initializing
+            ; invoke Initializing
             mov gameState, STATE_PLAYING
             invoke changeButtonImage, lParam, green
 
         .elseif gameState == STATE_PLAYING
-
+            invoke resolveClickPosition, lParam
+            ;;;
+            invoke updateShow
         .else
+            ; invoke updateShow
             
         .endif
         ; invoke showLED, hWnd, -1
 
     .ELSEIF uMsg == WM_RBUTTONUP 
+        invoke resolveClickPosition, lParam
+        ;;;
+        invoke updateShow
         invoke changeButtonImage, lParam, flag
 
     .ELSE
