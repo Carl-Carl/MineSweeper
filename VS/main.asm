@@ -29,6 +29,7 @@ PromptError      proto
 include     windows.inc
 include     user32.inc
 include     kernel32.inc
+include     msgame.inc
 
 
 .data
@@ -48,30 +49,7 @@ ButtonText1     BYTE "1", 0
 ButtonText2     BYTE "Select the second file.", 0
 ButtonText3     BYTE "Compare1", "Compare2", 0
 
-mine_num_path BYTE   "src\images\0.bmp", 0,
-                     "src\images\1.bmp", 0,
-                     "src\images\2.bmp", 0,
-                     "src\images\3.bmp", 0,
-                     "src\images\4.bmp", 0,
-                     "src\images\5.bmp", 0,
-                     "src\images\6.bmp", 0,
-                     "src\images\7.bmp", 0,
-                     "src\images\8.bmp", 0
-mine_num_path_length dd ($-mine_num_path)/9
 
-led_path BYTE        "src\images\led0.bmp", 0,
-                     "src\images\led1.bmp", 0,
-                     "src\images\led2.bmp", 0,
-                     "src\images\led3.bmp", 0,
-                     "src\images\led4.bmp", 0,
-                     "src\images\led5.bmp", 0,
-                     "src\images\led6.bmp", 0,
-                     "src\images\led7.bmp", 0,
-                     "src\images\led8.bmp", 0,
-                     "src\images\led9.bmp", 0
-led_path_length dd ($-led_path)/10
-
-hidden_path BYTE   "src\images\hidden.bmp", 0
 
 menuCaptionText BYTE "Level of Difficulty", 0
 menuEasyText BYTE "Easy", 0
@@ -91,9 +69,15 @@ led1_handle             HWND 0
 led0_handle             HWND 0
 
 ; image handles
-mine_num    HBITMAP 9 dup(?)
-led_num     HBITMAP 10 dup(?)
+mine_num    HBITMAP 9   dup(?)
+led_num     HBITMAP 10  dup(?)
 hidden      HBITMAP ?
+flag        HBITMAP ?
+mine        HBITMAP ?
+exploded    HBITMAP ?
+red         HBITMAP ?
+green       HBITMAP ?
+flag_wrong  HBITMAP ?
 
 paint           PAINTSTRUCT <>
 hDC             HDC ?
@@ -257,15 +241,15 @@ showMap proc C  hWnd:HWND, Width1: DWORD, Height1: DWORD, buttonWidth1: DWORD, b
             add esi, 60
 
             ; ID of button
-            mov eax, edi
-            sal eax, 16
-            or eax, esi
+            xor eax, eax
+            mov ah, bl
+            mov al, cl
 
 
             push ecx
             push edx
             invoke CreateWindowEx, NULL, ADDR ButtonClassName, ADDR ButtonText1, \
-                    WS_CHILD or WS_VISIBLE or BS_DEFPUSHBUTTON or BS_BITMAP, \
+                    WS_CHILD or WS_VISIBLE or BS_PUSHBUTTON or BS_BITMAP, \
                     edi, esi, buttonWidth1, buttonHeight1, hWnd, eax, hInstance, NULL
 
             mov esi, eax
@@ -403,9 +387,27 @@ loadBitmap proc C
         inc esi
     .endw
 
-    ; load hidden image
+    ; load other image of mine status
     invoke  LoadImageA, NULL, addr hidden_path, IMAGE_BITMAP, 25, 25, LR_LOADFROMFILE
     mov hidden, eax
+
+    invoke  LoadImageA, NULL, addr flag_path, IMAGE_BITMAP, 25, 25, LR_LOADFROMFILE
+    mov flag, eax
+
+    invoke  LoadImageA, NULL, addr mine_path, IMAGE_BITMAP, 25, 25, LR_LOADFROMFILE
+    mov mine, eax
+
+    invoke  LoadImageA, NULL, addr exploded_path, IMAGE_BITMAP, 25, 25, LR_LOADFROMFILE
+    mov exploded, eax
+
+    invoke  LoadImageA, NULL, addr red_path, IMAGE_BITMAP, 25, 25, LR_LOADFROMFILE
+    mov red, eax
+
+    invoke  LoadImageA, NULL, addr green_path, IMAGE_BITMAP, 25, 25, LR_LOADFROMFILE
+    mov green, eax
+
+    invoke  LoadImageA, NULL, addr flag_wrong_path, IMAGE_BITMAP, 25, 25, LR_LOADFROMFILE
+    mov flag_wrong, eax
 
     pop edx
     pop ecx
@@ -476,9 +478,11 @@ handle_function proc hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
         shr ebx, 16
         .if bh == BN_CLICKED  
             ; "lParam" is the handle of button
-            invoke changeButtonImage, lParam, mine_num[2*type mine_num]
+            invoke changeButtonImage, lParam, green
 
             invoke showLED, hWnd, -1
+        .elseif bh == BN_DOUBLECLICKED
+            invoke changeButtonImage, lParam, flag
         .endif
 
     .ELSE
