@@ -19,6 +19,12 @@ TOTOAL_SCALE DWORD 0
 .code
 
 Initializing   proc
+    LOCAL ROW: DWORD
+    LOCAL COLUMN: DWORD
+    LOCAL ROW_MAX: DWORD
+    LOCAL COL_MAX: DWORD
+    
+    push eax
 	push ebx
     push ecx
     push edx
@@ -37,9 +43,9 @@ Initializing   proc
         cmp    POSITION,Clicked_point
         JE     USED
 
-        mov    ecx, MINE
+        mov    cl, MINE
         mov    ebx, POSITION
-        mov    dword ptr [realBoard+ebx],ecx
+        mov    dword ptr [realBoard+ebx],cl
 
         INC    CNT
         USED:
@@ -53,28 +59,120 @@ Initializing   proc
     MUL Board_row
     mov TOTAL_SCALE,eax
 
-    .while TOTAL_SCALE
+    mov ecx, Board_column
+    dec ecx
+    mov COL_MAX, ecx
 
-        xor    edx,edx
-        div    mine_total
-        mov    POSITION,edx
+    mov ecx, Board_row
+    dec ecx
+    mov ROW_MAX, ecx
 
-        cmp    POSITION,Clicked_point
-        JE     USED
+    .while CNT < TOTAL_SCALE
+        mov ebx,CNT
 
-        mov    ecx, MINE
-        mov    ebx, POSITION
-        mov    dword ptr [realBoard+ebx],ecx
+        CMP byte ptr [realBoard+ebx], MINE
+        JE  IS_MINE
 
-        INC    CNT
-        USED:
+        xor edx,edx
+        mov eax,CNT
+        DIV Board_column
+   
+        .IF eax != 0 
+            .IF edx != 0
+                mov ebx, eax
+                sub ebx, Board_column
+                dec ebx
+                .IF byte ptr [realBoard+ebx]==MINE
+                    mov ecx, CNT
+                    inc byte ptr [realBoard+ecx]
+                .ENDIF
+            .ENDIF
+
+            mov ebx, eax
+            sub ebx, Board_column
+            .IF byte ptr [realBoard+ebx]==MINE
+                mov ecx, CNT
+                inc byte ptr [realBoard+ecx]
+            .ENDIF
+
+            .IF edx != COL_MAX
+                mov ebx, eax
+                sub ebx, Board_column
+                inc ebx
+                .IF byte ptr [realBoard+ebx]==MINE
+                    mov ecx, CNT
+                    inc byte ptr [realBoard+ecx]
+                .ENDIF
+            .ENDIF
+
+        .ENDIF
+
+
+        .IF edx != 0
+            mov ebx, eax
+            dec ebx
+            .IF byte ptr [realBoard+ebx]==MINE
+                mov ecx, CNT
+                inc byte ptr [realBoard+ecx]
+            .ENDIF
+        .ENDIF
+
+        .IF edx != COL_MAX
+            mov ebx, eax
+            inc ebx
+            .IF byte ptr [realBoard+ebx]==MINE
+                mov ecx, CNT
+                inc byte ptr [realBoard+ecx]
+            .ENDIF
+        .ENDIF
+
+
+
+
+        .IF eax != ROW_MAX
+            .IF edx != 0
+                mov ebx, eax
+                add ebx, Board_column
+                dec ebx
+                .IF byte ptr [realBoard+ebx]==MINE
+                    mov ecx, CNT
+                    inc byte ptr [realBoard+ecx]
+                .ENDIF
+            .ENDIF
+
+            mov ebx, eax
+            add ebx, Board_column
+            .IF byte ptr [realBoard+ebx]==MINE
+                mov ecx, CNT
+                inc byte ptr [realBoard+ecx]
+            .ENDIF
+
+            .IF edx != COL_MAX
+                mov ebx, eax
+                add ebx, Board_column
+                inc ebx
+                .IF byte ptr [realBoard+ebx]==MINE
+                    mov ecx, CNT
+                    inc byte ptr [realBoard+ecx]
+                .ENDIF
+            .ENDIF
+
+        .ENDIF
+
+
+
+    IS_MINE:
+        INC CNT
+
     .endw
+
 
     pop edi
     pop esi
     pop edx
     pop ecx
     pop ebx
+    pop eax
     ret
 Initializing endp
 
