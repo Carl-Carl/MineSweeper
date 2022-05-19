@@ -567,7 +567,7 @@ handle_function proc hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
         invoke PostQuitMessage, NULL
 
     .ELSEIF uMsg == WM_CREATE
-        
+        mov eax, xxx
         ; menu
         invoke CreateMenu
         mov hMenu, eax

@@ -103,3 +103,5 @@ flag_path       BYTE    "src\images\flag.bmp", 0
 flag_wrong_path BYTE    "src\images\flag_wrong.bmp", 0
 mine_path       BYTE    "src\images\mine.bmp", 0
 exploded_path   BYTE    "src\images\exploded.bmp", 0
+
+extern xxx:dword

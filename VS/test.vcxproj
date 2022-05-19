@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <MASM Include="define.asm" />
     <MASM Include="main.asm">
       <IncludePaths Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\masm32\include;%(IncludePaths)</IncludePaths>
     </MASM>
