@@ -89,6 +89,42 @@ hMemDC          HDC ?
 led1    dd 0    ; the ends digit of LED
 led0    dd 0    ; the ones digit of LED
 
+
+
+; --- image resource ---
+mine_num_path   BYTE    "src\images\0.bmp", 0,
+                        "src\images\1.bmp", 0,
+                        "src\images\2.bmp", 0,
+                        "src\images\3.bmp", 0,
+                        "src\images\4.bmp", 0,
+                        "src\images\5.bmp", 0,
+                        "src\images\6.bmp", 0,
+                        "src\images\7.bmp", 0,
+                        "src\images\8.bmp", 0
+mine_num_path_length dd ($-mine_num_path)/9
+
+led_path        BYTE    "src\images\led0.bmp", 0,
+                        "src\images\led1.bmp", 0,
+                        "src\images\led2.bmp", 0,
+                        "src\images\led3.bmp", 0,
+                        "src\images\led4.bmp", 0,
+                        "src\images\led5.bmp", 0,
+                        "src\images\led6.bmp", 0,
+                        "src\images\led7.bmp", 0,
+                        "src\images\led8.bmp", 0,
+                        "src\images\led9.bmp", 0
+led_path_length dd ($-led_path)/10
+
+hidden_path     BYTE    "src\images\hidden.bmp", 0
+green_path      BYTE    "src\images\green.bmp", 0
+red_path        BYTE    "src\images\red.bmp", 0
+flag_path       BYTE    "src\images\flag.bmp", 0
+flag_wrong_path BYTE    "src\images\flag_wrong.bmp", 0
+mine_path       BYTE    "src\images\mine.bmp", 0
+exploded_path   BYTE    "src\images\exploded.bmp", 0
+
+
+
 .const
 Button1ID       equ 1
 Button2ID       equ 2
